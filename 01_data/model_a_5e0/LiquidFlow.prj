@@ -1,0 +1,348 @@
+<?xml version='1.0' encoding='ISO-8859-1'?>
+<OpenGeoSysProject>
+    <meshes>
+        <mesh>mesh/reservoir_0_0_reordered_mat_k.vtu</mesh>
+        <mesh>mesh/Sub_line_xmax_0_0.vtu</mesh>
+        <mesh>mesh/Sub_line_xmin_0_0.vtu</mesh>
+        <mesh>mesh/Sub_line_ymax_0_0.vtu</mesh>
+        <mesh>mesh/Sub_line_ymin_0_0.vtu</mesh>
+    </meshes>
+    <processes>
+        <process>
+            <name>LiquidFlow</name>
+            <type>LIQUID_FLOW</type>
+            <integration_order>2</integration_order>
+            <!-- <dimension>1</dimension> -->
+            <process_variables>
+                <process_variable>pressure</process_variable>
+            </process_variables>
+            <secondary_variables>
+                <secondary_variable internal_name="darcy_velocity" output_name="v"/>
+                <!-- <secondary_variable internal_name="k" output_name="k"/> -->
+            </secondary_variables>
+            <specific_body_force>0.0 0.0</specific_body_force>
+            <!-- <mass_lumping>true</mass_lumping> -->
+        </process>
+    </processes>
+    <media>
+        <medium id="0">
+            <phases>
+                <phase>
+                    <type>AqueousLiquid</type>
+                    <properties>
+                        <property>
+                            <name>viscosity</name>
+                            <type>Constant</type>
+                            <value>1.006e-3 </value>
+                        </property>
+                        <property>
+                            <name>density</name>
+                            <type>Constant</type>
+                            <value>998.2</value>
+                        </property>
+                    </properties>
+                </phase>
+            </phases>
+            <properties>
+                <property>
+                    <name>permeability</name>
+                    <type>Parameter</type>
+                    <parameter_name>k</parameter_name>
+                </property>
+                <!-- <property>
+                    <name>permeability</name>
+                    <type>Constant</type>
+                    <value>1e-16</value>
+                </property> -->
+                <property>
+                    <name>reference_temperature</name>
+                    <type>Constant</type>
+                    <value>293.15</value>
+                </property>
+                <property>
+                    <name>porosity</name>
+                    <type>Constant</type>
+                    <value>0.01</value>
+                </property>
+                <property>
+                    <name>storage</name>
+                    <type>Constant</type>
+                    <value>8.730336828513545e-12</value>
+                </property>
+            </properties>
+        </medium>
+        <!--  <medium id="1">
+            <phases>
+                <phase>
+                    <type>AqueousLiquid</type>
+                    <properties>
+                        <property>
+                            <name>viscosity</name>
+                            <type>Constant</type>
+                            <value>1.006e-3 </value>
+                        </property>
+                        <property>
+                            <name>density</name>
+                            <type>Constant</type>
+                            <value>998.2</value>
+                        </property>
+                    </properties>
+                </phase>
+            </phases>
+            <properties>
+                <property>
+                    <name>permeability</name>
+                    <type>Constant</type>
+                    <value>1e-18</value>
+                </property>
+                <property>
+                    <name>reference_temperature</name>
+                    <type>Constant</type>
+                    <value>293.15</value>
+                </property>
+                <property>
+                    <name>porosity</name>
+                    <type>Constant</type>
+                    <value>0.01</value>
+                </property>
+                <property>
+                    <name>storage</name>
+                    <type>Constant</type>
+                    <value>1.416e-11</value>
+                </property>
+            </properties>
+        </medium> -->
+    </media>
+    <time_loop>
+        <processes>
+            <process ref="LiquidFlow">
+                <nonlinear_solver>basic_picard</nonlinear_solver>
+                <convergence_criterion>
+                    <type>DeltaX</type>
+                    <norm_type>NORM2</norm_type>
+                    <abstol>1.e-6</abstol>
+                </convergence_criterion>
+                <time_discretization>
+                    <type>BackwardEuler</type>
+                </time_discretization>
+                <!-- <time_stepping>
+                    <type>EvolutionaryPIDcontroller</type>
+                    <t_initial>0</t_initial>          
+                    <t_end>1.5e7</t_end> 
+                    <dt_guess>1</dt_guess>
+                    <dt_min>1</dt_min>
+                    <dt_max>5e5</dt_max>
+                    <rel_dt_min>0.01</rel_dt_min>
+                    <rel_dt_max>2</rel_dt_max>  
+                    <tol>1</tol>
+                </time_stepping> -->
+                <time_stepping>
+                    <type>FixedTimeStepping</type>
+                    <t_initial>0</t_initial>
+                    <t_end>5.5e6</t_end>
+                    <timesteps>
+                    <pair>  <repeat>1</repeat>  <delta_t>     1</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>   225</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>  1578</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>  4284</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>  8343</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 13756</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 20521</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 28639</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 38111</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 48935</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 61113</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 74644</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t> 89528</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>105764</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>123354</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>142297</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>162593</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>184242</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>207245</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>231600</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>257308</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>284369</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>312784</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>342551</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>373672</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>406146</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>439972</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>475152</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>511685</delta_t>  </pair>
+<pair>  <repeat>1</repeat>  <delta_t>549571</delta_t>  </pair>
+                    </timesteps>
+                </time_stepping>
+            </process>
+        </processes>
+        <output>
+            <type>VTK</type>
+            <prefix>Flow2D_LiquidFlow_</prefix>
+            <timesteps>
+                <pair>
+                    <repeat>1</repeat>
+                    <each_steps>1</each_steps>
+                </pair>
+            </timesteps>
+            <variables>
+                <variable>pressure</variable>
+                <variable>v</variable>
+                <variable>k</variable>
+            </variables>
+            <suffix>_ts_{:timestep}_t_{:time}</suffix>
+            <!-- <fixed_output_times>1 2999999 3000000 3000001</fixed_output_times>  -->
+        </output>
+    </time_loop>
+    <parameters>
+        <!-- Model parameters -->
+        <parameter>
+            <name>zero</name>
+            <type>Constant</type>
+            <value>0</value>
+        </parameter>
+        <parameter>
+            <name>k</name>
+            <type>MeshElement</type>
+            <field_name>k</field_name>
+        </parameter>
+        <parameter>
+            <name>p_test</name>
+            <type>Constant</type>
+            <!-- <value>1e5</value> -->
+            <value>0</value>
+        </parameter>
+        <parameter>
+            <name>pressure_ic</name>
+            <type>Constant</type>
+            <!-- <value>1e5</value> -->
+            <value>0e+00</value>
+        </parameter>
+        <parameter>
+            <name>p_in</name>
+            <type>CurveScaled</type>
+            <curve>curve_p_in</curve>
+            <parameter>p_in_start</parameter>
+        </parameter>
+        <parameter>
+            <name>p_in_start</name>
+            <type>Constant</type>
+            <value>1</value>
+        </parameter>
+        <parameter>
+            <name>p_out</name>
+            <type>Constant</type>
+            <value>0e+00</value>
+        </parameter>
+    </parameters>
+    <curves>
+        <!-- Pressure curve -->
+        <!-- <curve>
+            <name>curve_p_in</name>
+            <coords>1 3000000 3000001 6000000</coords>
+            <values>1e+06 1e+06 1e+06 1e+06</values>
+        </curve> -->
+        <curve>
+            <name>curve_p_in</name>
+            <coords>1 6000000</coords>
+            <values>1e+06 1e+06</values>
+        </curve>
+    </curves>
+    <process_variables>
+        <process_variable>
+            <name>pressure</name>
+            <components>1</components>
+            <order>1</order>
+            <initial_condition>pressure_ic</initial_condition>
+            <boundary_conditions>
+                <boundary_condition>
+                    <mesh>Sub_line_xmin_0_0</mesh>
+                    <type>Dirichlet</type>
+                    <component>0</component>
+                    <parameter>p_in</parameter>
+                </boundary_condition>
+                <boundary_condition>
+                    <mesh>Sub_line_xmax_0_0</mesh>
+                    <type>Dirichlet</type>
+                    <component>0</component>
+                    <parameter>p_out</parameter>
+                </boundary_condition>
+                <!-- <boundary_condition>
+                    <mesh>Sub_line_ymax_0_0</mesh>
+                    <type>Neumann</type>
+                    <component>0</component>
+                    <parameter>zero</parameter>
+                </boundary_condition>
+                <boundary_condition>
+                    <mesh>Sub_line_ymin_0_0</mesh>
+                    <type>Neumann</type>
+                    <component>0</component>
+                    <parameter>zero</parameter>
+                </boundary_condition> -->
+            </boundary_conditions>
+            <!-- <source_terms>
+                <source_term>
+                    <mesh>Sub_Edge_X_neg_0_0</mesh>
+                    <type>Nodal</type>
+                    <parameter>p_in</parameter>
+                </source_term>
+            </source_terms> -->
+        </process_variable>
+    </process_variables>
+    <!-- Setting from Embedded Fracture Modell -->
+    <!--     <nonlinear_solvers>
+        <nonlinear_solver>
+            <name>basic_newton</name>
+            <type>Newton</type>
+            <max_iter>100</max_iter>
+            <linear_solver>general_linear_solver</linear_solver>
+        </nonlinear_solver>
+    </nonlinear_solvers>
+    <linear_solvers>
+        <linear_solver>
+            <name>general_linear_solver</name>
+            <lis>-i SparseLU -p ilu -tol 1e-8 -maxiter 10000</lis>
+            <eigen>
+                <solver_type>SparseLU</solver_type>
+                <precon_type>DIAGONAL</precon_type>
+                <max_iteration_step>10000</max_iteration_step>
+                <error_tolerance>1e-8</error_tolerance>
+            </eigen>
+        </linear_solver>
+    </linear_solvers> -->
+    <!-- ============================================================= -->
+    <!-- Setting from Liquid Flow: -->
+    <nonlinear_solvers>
+        <nonlinear_solver>
+            <name>basic_picard</name>
+            <type>Picard</type>
+            <max_iter>10</max_iter>
+            <linear_solver>general_linear_solver</linear_solver>
+        </nonlinear_solver>
+    </nonlinear_solvers>
+    <linear_solvers>
+        <linear_solver>
+            <name>general_linear_solver</name>
+            <lis>-i SparseLU -p ilu -tol 1e-8 -maxiter 10000</lis>
+            <eigen>
+                <solver_type>SparseLU</solver_type>
+                <precon_type>DIAGONAL</precon_type>
+                <max_iteration_step>10000</max_iteration_step>
+                <error_tolerance>1e-8</error_tolerance>
+            </eigen>
+        </linear_solver>
+<!--         <linear_solver>
+            <name>general_linear_solver</name>
+            <lis>-i cg -p jacobi -tol 1e-10 -maxiter 10000</lis>
+            <eigen>
+                <solver_type>CG</solver_type>
+                <precon_type>DIAGONAL</precon_type>
+                <max_iteration_step>10000</max_iteration_step>
+                <error_tolerance>1e-10</error_tolerance>
+            </eigen>
+            <petsc>
+                <prefix>lf</prefix>
+                <parameters>-lf_ksp_type cg -lf_pc_type bjacobi -lf_ksp_rtol 1e-16 -lf_ksp_max_it 10000</parameters>
+            </petsc>
+        </linear_solver> -->
+    </linear_solvers>
+</OpenGeoSysProject>
