@@ -800,8 +800,7 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
         plt.yscale("log")
         plt.grid(True, which="both",color="lightgrey")
         plt.legend()
-        plt.savefig("plots/plot_GT_equivalent_permeability {}.png".format(iteration_nr),dpi=300)
-
+        plt.savefig("{}/Fig_05_{:2d}_plot_GT_equivalent_permeability.png".format(model_path_save,iteration_nr),dpi=300)
 
     # %%% Train kd
     Nr_CP_kd = 6400
