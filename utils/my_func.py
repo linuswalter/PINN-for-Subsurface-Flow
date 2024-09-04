@@ -20,6 +20,7 @@ from tensorflow.python.ops import math_ops
 from tensorflow.python.keras import backend
 
 # %% Class for Experimental Setup
+
 class experiment_setup:
     def __init__(self,delay=1,test_run=False):
         self.dict_experiment_params = {}
@@ -64,7 +65,9 @@ class experiment_setup:
             #Assign Custom variable
             elif int(experiment_nr)>len(self.experiment_param)-1 and isinstance(experiment_param[0],(int,float)):
                 if type(self.experiment_param[0]) == float: custom_val = float(input("Enter custom value : "))
-                else: custom_val = int(input("Enter custom value : "))
+                else:
+                    custom_val_in = float(input("Enter custom value : "))
+                    custom_val = int(custom_val_in) if custom_val_in.is_integer() else float(custom_val_in)
                 assert isinstance(custom_val, type(self.experiment_param[0])), "Please provide a value in the same format as the given values"
                 self.experiment_param_choice = custom_val
             else: self.experiment_param_choice = experiment_param[int(experiment_nr)]
@@ -92,6 +95,18 @@ class experiment_setup:
         pickle.dump(self.dict_experiment_params,f)
         f.close()
         print("Experiment Parameters saved to Path:\n {}".format(file_path))
+        
+    def save_to_text(self,path=""):
+        path = f"{path}/"
+        with open(f"{path}experiment_params.txt", "w") as f:
+            print(f"Path: {path}",file=f)
+            for i_keys in self.dict_experiment_params.keys():
+                print(f"{i_keys} = {self.dict_experiment_params[i_keys]}",file=f)
+            
+    def update_value(self,key:str,value):
+        if key in self.dict_experiment_params.keys(): 
+            self.dict_experiment_params[key] = value
+        else: raise ValueError("Please enter a key of an existing entry")
 
     def print_summary(self):
         print("============================================================================\nSummary:\n")

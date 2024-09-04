@@ -1,23 +1,22 @@
- # FlowPINN Model
+# FlowPINN Model
 
 This repository contains all data models to reproduce the results of our paper ==insert paper citation here==.
 This readme was tested under Manjaro Linux. It should work similarly under Windows/Mac. 🤔
 
-## 1. Prerequisites
+## 1. Prerequisites: Download Anaconda and Setup Anaconda Environment
+For creating the virtual environment, we use [Miniconda](https://docs.anaconda.com/miniconda/) which is a light version of [Anaconda](https://docs.anaconda.com/anaconda/install/). Please make sure that you have one of them installed on your machine.
 
 Open the terminal/command line and type the following commands:
 ```bash
-conda create -n FlowPINN python=3.9 -y
+#clone repository on your computer
+git clone https://github.com/linuswalter/PINN-for-Subsurface-Flow
+
+# Install from file
+conda env create -f environment.yml
 conda activate FlowPINN
-
-# Register kernel for jupyter notebook
-python -m ipykernel install --user --name FlowPINN
-
-pip install tensorflow==2.11.0
-pip install -r requirements.txt
 ```
 
-Do no open the Notebook in VSCode but rather in the original jupyter NB environment in order to be able to set the parameters.
+We recommend to use our code in [VSCode](https://code.visualstudio.com/) in combination with the [IPython Extension](https://marketplace.visualstudio.com/items?itemName=HoangKimLai.ipython) which allows you to run code cells separately.
 
 ## 1. Data
 The `01_data` directory contains the csv-files `ogs_output_a_1e0.csv` and `ogs_output_a_5e0.csv` which contain the synthetic datasets for an equivalent fracture length of $a=1\text{m}$ and $a=5\text{m}$. 
@@ -52,7 +51,10 @@ Create GIF of PNG? = True
 
 In the second part of the first experiment, one can set the experiment parameter `Standard Deviation of the Gaussian Noise` to a higher value, like $\sigma = 0.02$ or $\sigma = 0.04$.
 
-### 2.2 Experiment ANN versus PINN
+**Expected Results:**
+![](03_figures/Fig_2_1_Experiment_ANN_versus_PINN.png)
+
+### 2.2 PINN with high Permeability Contrast and no Observation Points
 
 The second experiment can be reproduced by choosing the following parameter settings.
 
@@ -60,9 +62,10 @@ The second experiment can be reproduced by choosing the following parameter sett
 Name Ground Truth Dataset = ogs_output_a_1e0
 Load weights for kd? = False
 Load weights for pd_pinn? = False
-Number Epochs Training kd = 500
-Number Epochs pd = 1000
+Number Epochs Training kd = 300
+Number Epochs pd = 500
 Perform retraining for too high loss values? = True
+Error Treshold for Retraining PINN = 0.0001
 Number of Iterations = 20
 Nr observation points = 0
 Standard Deviation of the Gaussian Noise = 0
@@ -74,6 +77,9 @@ Safe Plots as PNG? = True
 Create GIF of PNG? = True
 ```
 
-### Results
+**Expected Result:**
+![](03_figures/Fig_2_2_PINN_with_high_Permeability_Contrast.png)
+
+### Model Output
 
 The results will be saved in the directory `02_model_output` -> `model_DATE_TIME` 

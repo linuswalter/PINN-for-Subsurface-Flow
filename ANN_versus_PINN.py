@@ -1,3 +1,6 @@
+# Ipython startup command
+# ipython --no-autoindent --matplotlib=agg --InteractiveShellApp.exec_lines="%matplotlib auto" --InteractiveShellApp.exec_lines="%load_ext autoreload" --InteractiveShellApp.exec_lines="%autoreload 2"
+
 # %% Import
 import numpy as np
 import pickle
@@ -21,7 +24,8 @@ import matplotlib as mpl
 import matplotlib.pyplot as plt
 import matplotlib.colors
 from matplotlib.colors import LogNorm, Normalize
-matplotlib.use('module://ipykernel.pylab.backend_inline')
+matplotlib.use('agg')
+# matplotlib.use('tkagg')
 plt.style.use("default")
 
 # Own Files
@@ -57,13 +61,13 @@ experiment_param_GT_dataset = experiment_FlowPINN.add_param(["ogs_output_a_1e0",
                 name="Name Ground Truth Dataset")
 
 load_weights_kd = experiment_FlowPINN.add_param([False,True],
-                # fixed_var = 0,
+                fixed_var = 0,
                 # fixed_var = 1,
                 default_var=0,
                 name="Load weights for kd?")
 
 load_weights_pd_pinn = experiment_FlowPINN.add_param([False,True],
-                # fixed_var = 0,
+                fixed_var = 0,
                 # fixed_var = 1,
                 default_var=0,
                 name="Load weights for pd_pinn?")
@@ -81,8 +85,8 @@ if test_run==True:
                                             name="Number Epochs pd(xd) for test run")
 
 else:
-    experiment_param_epochs_kd = experiment_FlowPINN.add_param([10,50,200,500,1000,2000],
-                                            fixed_var=3,
+    experiment_param_epochs_kd = experiment_FlowPINN.add_param([100,300,500],
+                                            fixed_var=1,
                                             default_var=0,
                                             name="Number Epochs Training kd")
 
@@ -98,27 +102,28 @@ else:
     
     if experiment_param_pd_pinn_retraining==True:
         experiment_param_epochs_pd_pinn_retraining_treshold = experiment_FlowPINN.add_param([1e-3,8e-4,5e-4,1e-4],
-                                                # fixed_var = 1,
-                                                default_var=0,
+                                                fixed_var = 3,
+                                                default_var=3,
                                                 doc="This threshold value decides if the PINN needs to be retrained with more epochs.",
                                                 name="Error Treshold for Retraining PINN")
-    else: experiment_param_epochs_pd_pinn_retraining_treshold=0.001
+    else: experiment_param_epochs_pd_pinn_retraining_treshold=0.0001
 
 experiment_param_pd_serial_iterx = experiment_FlowPINN.add_param([1,20],
                 doc="Through how many retraining iterations should the PINN go?",
                 default_var=0,
                 name="Number of Iterations")
 
-experiment_param_nr_observation_points = experiment_FlowPINN.add_param([25,10,4],
+experiment_param_nr_observation_points = experiment_FlowPINN.add_param([25,10,4,0],
                 default_var=0,
                 name="Nr observation points")
 
 experiment_param_sigma_noise = experiment_FlowPINN.add_param([0,0.01,0.02,0.03,0.04,0.1],
-                fixed_var = 0,
+                # fixed_var = 0,
                 default_var=0,
                 name="Standard Deviation of the Gaussian Noise")
 
 experiment_param_pinn_obs = experiment_FlowPINN.add_param([False,True],
+                doc="This should be set 'True' for Experiment Nr1 and 'False' for Experiment Nr2",
                 default_var=0,
                 name="PINN with observation loss term?")
 
@@ -161,8 +166,23 @@ experiment_param_create_gif = experiment_FlowPINN.add_param([False,True],
                 default_var=0,
                 name="Create GIF of PNG?")
 
+
 experiment_FlowPINN.print_summary()
 experiment_FlowPINN.abort_if_x()
+
+# %%% Paths to Save and Load Models
+# We create for each model a path where it can be saved
+save_model = save_models()
+model_path_save = save_model.get_path()
+
+experiment_FlowPINN.save_experiment_params(model_path_save)
+experiment_FlowPINN.save_to_text(model_path_save)
+
+# load_weights_pd_dat = True
+load_weights_pd_dat = False
+model_path_load_pd_dat ="saved_models/{}".format("")
+model_path_load_kd ="saved_models/{}".format("")
+model_path_load_pd_pinn ="saved_models/{}".format("")
 
 # %% Classes and Functions
 
@@ -438,16 +458,6 @@ class log_scale_zero_to_one():
     
 # %% Preprocessing
 
-# %%% Paths to Save and Load Models
-# We create for each model a path where it can be saved
-save_model = save_models()
-model_path_save = save_model.get_path()
-
-# load_weights_pd_dat = True
-load_weights_pd_dat = False
-model_path_load_pd_dat ="saved_models/{}".format("")
-model_path_load_kd ="saved_models/{}".format("")
-model_path_load_pd_pinn ="saved_models/{}".format("")
 
 # %%% Load Ground Truth
 
@@ -459,9 +469,9 @@ GT_OGS = GT_OGS.loc[GT_OGS["t"]>t_start_filter]
 # Assign Material Properties of Factures to Dictionary
 # =============================================================================
 frac_matrix = np.array([
-            # File name       a       start_si    final_si      timesteps
-            ["ogs_output_a_1e0",   1e0 ,   0.8,   0.15,         "[10,18,25,27,30]"],
-            ["ogs_output_a_5e0",   5e0 ,   0.2,   0.2,          "[2,9,15,28]"],
+            # File name            a       start_si    final_si      timesteps
+            ["ogs_output_a_1e0",   1e0 ,   0.8,        0.15,         "[10,18,25,27,30]"],
+            ["ogs_output_a_5e0",   5e0 ,   0.2,        0.2,          "[2,9,15,28]"],
     ])
 
 frac_idx = list(frac_matrix[:,0]).index(experiment_param_GT_dataset)
@@ -558,12 +568,12 @@ fig.subplots_adjust(left=None, bottom=0, right=30, top=None, wspace=None, hspace
 cmap_kx = plt.get_cmap("flare",len(sigma_k_reduction))
 
 for i_sigma_k_reduction in range(len(sigma_k_reduction)):
-    GT_OGS_k_Gauss = pandas.DataFrame(data={'x':GT_OGS_k['x'],
+    GT_OGS_k_Gauss_step = pandas.DataFrame(data={'x':GT_OGS_k['x'],
                                         'k': Gaussian_permeability(k_max,k_min,dict_equiv_frac_params["a"],GT_OGS_k['x'],12.5,
                                                                     sigma_k_reduction[i_sigma_k_reduction]*dict_equiv_frac_params["a"])
                                         })
 
-    ax.plot(GT_OGS_k_Gauss['x'],GT_OGS_k_Gauss['k'],linewidth=1,label=r"$k_\mathregular{g}(x)$",color=cmap_kx(i_sigma_k_reduction),zorder=3)
+    ax.plot(GT_OGS_k_Gauss_step['x'],GT_OGS_k_Gauss_step['k'],linewidth=1,label=r"$k_\mathregular{g}(x)$",color=cmap_kx(i_sigma_k_reduction),zorder=3)
     # plt.plot(x*x_c,Gaussian_permeability(k_max,k_min,a,x,mu,si),linewidth=3,label=r"$k_\mathregular{g}(x)$",color=my_cmap["v"],zorder=3,linestyle="dashed")
     if i_sigma_k_reduction==0:plt.legend(fontsize=12)
 
@@ -1059,7 +1069,6 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
         print('\n Model completed in {:0.2f}s'.format(time.time() - start_time))
         # %%%% Eval pd
         
-        matplotlib.interactive(True)
         # switch_plot_history=False
         switch_plot_history=True
         if switch_plot_history==True:
@@ -1121,6 +1130,7 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
                 ax2.legend(loc='upper left', bbox_to_anchor=(0.65, 0.75 ),facecolor="white",framealpha=1.)
 
         ax1.grid(zorder=0)
+        ax1.set_title(r"$\sigma = {:.2f}$".format(kd_GT_sigma))
         ax1.set_xlabel(r"$\bar{x}$")
         ax1.set_ylabel(r"$\bar{p}(\bar{x},\bar{t})$")
         ax1.set_ylim(-0.1,1.1)
@@ -1162,6 +1172,7 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
             ax_lr.plot(hist_dict_pd_pinn["lr"],color="black",linestyle="dashed",label="Learning Rate")
             ax_lr.set_ylabel("Learning Rate",color="black")
             ax_lr.tick_params(axis='y', labelcolor="black")
+            ax_lr.set_yscale("log")
             ax_lr.legend(bbox_to_anchor=(0.8,0.999))
             if experiment_param_safe_figs==True: plt.savefig("{}/Fig_06_PINN_training_iteration_{}.png".format(model_path_save,iteration_nr),dpi=300,bbox_inches='tight')
         else:
@@ -1335,6 +1346,8 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
         plt.xscale("log")
         plt.yscale("log")
         plt.show(),plt.close()
+        
+        repetion_pd_pinn +=1
 
 # %% Print Paths
 print("###############################")
