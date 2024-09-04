@@ -19,7 +19,7 @@ conda activate FlowPINN
 We recommend to use our code in [VSCode](https://code.visualstudio.com/) in combination with the [IPython Extension](https://marketplace.visualstudio.com/items?itemName=HoangKimLai.ipython) which allows you to run code cells separately.
 
 ## 1. Data
-The `01_data` directory contains the csv-files `ogs_output_a_1e0.csv` and `ogs_output_a_5e0.csv` which contain the synthetic datasets for an equivalent fracture length of $`a=1\text{m}`$ and $`a=5\text{m}`$. 
+The `01_data` directory contains the csv-files `ogs_output_a_1e0.csv` and `ogs_output_a_5e0.csv` which contain the synthetic datasets for an equivalent fracture length of $a=1$m and $`a=5\text{m}`$. 
 These are outputs from the numerical code [OpenGeoSys](https://www.opengeosys.org/). To make these outputs more reproducible, we also appended the directories `model_a_1e0`  and `model_a_5e0` which contain the respective mesh files (See `mesh`-directory, the project file `LiquidFlow.prj` for running the OGS model and the OGS output files in the `pvd` and `vtu` format. The file `LiquidFlow_.pvd` can be viewed in the interactive GUI of [ParaView](https://www.paraview.org/).
 
 ## 2. Experiments
