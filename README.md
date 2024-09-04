@@ -49,6 +49,7 @@ Create GIF of PNG? = True
 ```
 
 In the second part of the first experiment, one can set the experiment parameter `Standard Deviation of the Gaussian Noise` to a higher value, like σ = 0.02 or σ=0.04.
+
 **Expected Results:**
 ![](03_figures/Fig_2_1_Experiment_ANN_versus_PINN.png)
 
