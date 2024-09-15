@@ -1,7 +1,7 @@
 # FlowPINN Model
 
-This repository contains all code and data relevant for reproducing the results of our paper ==insert paper citation here==.
-This readme was tested under Manjaro Linux. It should work similarly under Windows/Mac. 🤔
+This repository contains all code and data relevant for reproducing the results of our paper "Bridging the Gap for Sparse Observations: Data-Driven versus Physics-Informed Neural Networks for Hydrogeological Applications".
+This readme was tested under Manjaro Linux. It should work similarly under Windows/Mac.
 
 ## 1. Prerequisites: Download Anaconda and Setup Anaconda Environment
 For creating the virtual environment, we use [Miniconda](https://docs.anaconda.com/miniconda/) which is a light version of [Anaconda](https://docs.anaconda.com/anaconda/install/). Please make sure that you have one of them installed on your machine.
