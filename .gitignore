@@ -1,0 +1,6 @@
+## Data Files
+*.h5
+*.hdf5
+
+# certain folders
+02_model_output/
