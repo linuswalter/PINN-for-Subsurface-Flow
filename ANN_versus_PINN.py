@@ -30,7 +30,7 @@ plt.style.use("default")
 
 # Own Files
 from utils.SciANN_custom_targets import assign_targets_to_input_dim
-from utils.template_values import *
+# from utils.template_values import *
 from utils.my_func import *
 from utils.my_plots import *
 matplotlib.rcParams.update(params)
@@ -74,13 +74,13 @@ load_weights_pd_pinn = experiment_FlowPINN.add_param([False,True],
 
 if test_run==True:
     experiment_param_epochs_kd = experiment_FlowPINN.add_param([10,50,100,200],
-                                            fixed_var=2,
+                                            fixed_var=0,
                                             default_var=0,
                                             name="Number Epochs Training kd")
 
     experiment_param_epochs_pd_pinn = experiment_FlowPINN.add_param([10,15,30,50,100],
                                             # fixed_var = 0,
-                                            fixed_var = 4,
+                                            fixed_var = 3,
                                             # fixed_var = 3,
                                             name="Number Epochs pd(xd) for test run")
 
@@ -90,7 +90,7 @@ else:
                                             default_var=0,
                                             name="Number Epochs Training kd")
 
-    experiment_param_epochs_pd_pinn = experiment_FlowPINN.add_param([500,1000,2000,3000,],
+    experiment_param_epochs_pd_pinn = experiment_FlowPINN.add_param([100,500,1000,2000,3000,],
                                             # fixed_var = 0,
                                             default_var=0,
                                             name="Number Epochs pd")
@@ -245,6 +245,7 @@ class DataGenerator_p_xt:
         self.x_stacked = np.meshgrid(self.x,np.ones(nr_obs_time))[0].flatten()
 
         self.inputs = [self.x_stacked.reshape(-1,1),self.t_stacked.reshape(-1,1)]
+        # self.targets = [(np.arange(len(self.x_stacked)),np.zeros(len(self.x_stacked)))]
         self.targets = [(np.arange(len(self.x_stacked)),np.zeros(len(self.x_stacked)))]
 
     def get_data(self):
@@ -261,7 +262,7 @@ class DataGenerator_p_xt:
         plt.ylim(np.min(self.t_stacked),np.max(self.t_stacked))
         plt.title(r"Observation Points for $p(\bar{x},\bar{t})$")
         plt.grid()
-        plt.show()
+        # plt.show()
         
 class DataGenerator_DataDriven_kd:
     def __init__(self,
@@ -442,7 +443,8 @@ class log_scale_zero_to_one():
             plt.figure(figsize=(10,7))
             plt.hist(x,log=True,bins=100,label="Data Distribution before Scaling",alpha=0.5)
             plt.hist(self.fx,log=True,bins=100,label="Data Distribution after Scaling",alpha=0.5)
-            plt.legend(),plt.grid(), plt.show()
+            plt.legend(),plt.grid()
+            # plt.show()
         return self.fx
     
     def backscale_data(self,fx):
@@ -522,7 +524,7 @@ ax1.set_zorder(ax2.get_zorder() - 1)
 ax1.set_ylabel("P /Pa")
 ax1.set_xlabel("x /m")
 plt.savefig("{}/Fig_01_Groundtruth_dataset.png".format(model_path_save),dpi=300)
-plt.show()
+# plt.show()
 
 # %%%% Equivalent Gaussian Permeability Distribution
 
@@ -556,7 +558,7 @@ plt.yscale("log")
 plt.grid(True, which="both",color="lightgrey")
 plt.legend()
 plt.savefig("{}/Fig_02_GT_equivalent_permeability.png".format(model_path_save),dpi=300)
-plt.show()
+# plt.show()
 
 
 # %%% Plot Full Permeability Distribution
@@ -592,7 +594,7 @@ if len(sigma_k_reduction)>1:
                 label=r"Standard Deviation $\sigma \; /a$",
                 ax=ax)
 plt.savefig("{}/Fig_03_Stepwise Permeability.png".format(model_path_save),dpi=300)
-plt.show()
+# plt.show()
 plt.close()
 # %%% Physical Parameters
 # Domain
@@ -683,6 +685,7 @@ dg_p_dat.plot_obs()
 
 dg_p_dat_val = DataGenerator_p_xt(X=[xd_min,xd_max], T=[td_min,td_max],nr_obs_space = nr_obs_wells if nr_obs_wells<5 else int(nr_obs_wells*0.2),
                                           nr_obs_time=int(100*0.2),logT=False,si_noise=experiment_param_sigma_noise,dataset_type="Validation")
+# dg_p_dat_val = DataGenerator_p_xt(X=[xd_min,xd_max], T=[td_min,td_max],nr_obs_space = nr_obs_wells,nr_obs_time=100,logT=False,si_noise=experiment_param_sigma_noise,dataset_type="Training")
 dg_input_p_val, dg_target_p_val = dg_p_dat_val.get_data()
 
 # Interpolate targets from Groundtruth dataset
@@ -697,7 +700,7 @@ for inp,tar,_class in zip([dg_input_p,dg_input_p_val],
     if isinstance(experiment_param_sigma_noise,(float,int)): tar[0] = (tar[0][0],tar[0][1]+_class.noise_stacked)
 
 plt.close()
-plt.scatter(dg_input_p[0],dg_target_p[0][1],s=1), plt.xscale("linear"), plt.title("Subsampled target data for Data-Driven NN"), plt.grid(), plt.show()
+plt.scatter(dg_input_p[0],dg_target_p[0][1],s=1), plt.xscale("linear"), plt.title("Subsampled target data for Data-Driven NN"), plt.grid()
 
 # %% ANN
 
@@ -707,7 +710,7 @@ create_dir(model_path_save+"/checkpoints")
 pd_ann = Data_Driven_ANN(experiment_param_nr_observation_points,si_noise=experiment_param_sigma_noise)
 pd_ann.train(inputs=dg_input_p,targets=dg_target_p,
              val=(dg_input_p_val,dg_target_p_val),
-             epochs=200,
+             epochs=20 if test_run==True else 200,
             #  path_load=model_path_save,
              path_save=model_path_save,
              test_run=test_run
@@ -827,10 +830,10 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
     
     plt.scatter(GT_OGS_k_Gauss["x"].values/x_c,GT_OGS_k_Gauss["k"].values/(k_c),s=1)
     plt.scatter(dg_input_data_k_x[0],dg_target_data_k_x[0][1],s=1,alpha=0.5)
-    plt.show(),plt.close()
+    plt.close()
     
-    plt.hist(dg_input_data_k_x[0],bins=50), plt.show(), plt.close()
-    plt.hist(dg_target_data_k_x[0][1],bins=50), plt.show(), plt.close()
+    plt.hist(dg_input_data_k_x[0],bins=50), plt.close()
+    plt.hist(dg_target_data_k_x[0][1],bins=50), plt.close()
     
     epochs_kd = experiment_param_epochs_kd
     batch_size_kd =  int(len(dg_input_data_k_x[0])*epochs_kd/50e3)
@@ -1177,7 +1180,7 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
             if experiment_param_safe_figs==True: plt.savefig("{}/Fig_06_PINN_training_iteration_{}.png".format(model_path_save,iteration_nr),dpi=300,bbox_inches='tight')
         else:
             if experiment_param_safe_figs==True: plt.savefig("{}/Fig_06_PINN_training_iteration_{}.png".format(model_path_save,iteration_nr),dpi=300,bbox_inches='tight')
-            plt.show(), plt.close()
+            plt.close()
             fig,ax = plt.subplots(figsize=(10,7))
             ax.plot(hist_dict_pd_pinn["loss"],label=r"$\mathcal{L}$")
             for i in range(len(targets_p_xt_table[:,4])):
@@ -1196,7 +1199,6 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
             ax_lr.legend(bbox_to_anchor=(1,0.65))
 
             plt.savefig("{}/Fig_07_PINN_training_history_{}.png".format(model_path_save,iteration_nr),dpi=300,bbox_inches='tight')
-        plt.show()
         
         # %%%% Print Error Map
 
@@ -1333,7 +1335,6 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
         ax4.set_ylabel(r"$\bar{t}$",labelpad=-5)
         
         plt.savefig("{}/Fig_08_PINN_plot_Error_Map_Iteration {}.png".format(model_path_save,iteration_nr ),dpi=300,bbox_inches="tight")
-        plt.show()
         ax1.set_title(r"$\sigma = {:.2f}$".format(kd_GT_sigma))
         plt.close()
 
@@ -1345,7 +1346,7 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
                     )
         plt.xscale("log")
         plt.yscale("log")
-        plt.show(),plt.close()
+        plt.close()
         
         repetion_pd_pinn +=1
 

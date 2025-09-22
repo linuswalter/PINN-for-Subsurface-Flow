@@ -6,19 +6,23 @@ This readme was tested under Manjaro Linux. It should work similarly under Windo
 ## 1. Prerequisites: Download Anaconda and Setup Anaconda Environment
 For creating the virtual environment, we use [Miniconda](https://docs.anaconda.com/miniconda/) which is a light version of [Anaconda](https://docs.anaconda.com/anaconda/install/). Please make sure that you have one of them installed on your machine.
 
-Open the terminal/command line and type the following commands:
+Open the terminal/command line and run the following commands:
 ```bash
 #clone repository on your computer
 git clone https://github.com/linuswalter/PINN-for-Subsurface-Flow
+```
 
-# Install from file
-conda env create -f environment.yml
-conda activate FlowPINN
+Then enter the repository, create a virtual enviroment with conda and install the exact required python packages through the given file:
+```python
+conda create -n FlowPINN_II python=3.9 -y
+conda activate FlowPINN_II
+pip install -r venv_requirements.txt
 ```
 
 We recommend to use our code in [VSCode](https://code.visualstudio.com/) in combination with the [IPython Extension](https://marketplace.visualstudio.com/items?itemName=HoangKimLai.ipython) which allows you to run code cells separately.
 
 ## 1. Data
+
 The `01_data` directory contains the csv-files `ogs_output_a_1e0.csv` and `ogs_output_a_5e0.csv` which contain the synthetic datasets for an equivalent fracture length of a=1m and a=5m. These are outputs from the numerical code [OpenGeoSys](https://www.opengeosys.org/). To make these outputs more reproducible, we also appended the directories `model_a_1e0`  and `model_a_5e0` which contain the respective mesh files (See `mesh`-directory, the project file `LiquidFlow.prj` for running the OGS model and the OGS output files in the `pvd` and `vtu` format. The file `LiquidFlow_.pvd` can be viewed in the interactive GUI of [ParaView](https://www.paraview.org/).
 
 ## 2. Experiments
@@ -81,4 +85,3 @@ Create GIF of PNG? = True
 
 ### Model Output
 The results will be saved in the directory `02_model_output` -> `model_DATE_TIME`
-
