@@ -60,14 +60,20 @@ experiment_param_GT_dataset = experiment_FlowPINN.add_param(["ogs_output_a_1e0",
                 default_var=1,
                 name="Name Ground Truth Dataset")
 
+load_weights_pd_dat = experiment_FlowPINN.add_param([False,True],
+                # fixed_var = 0,
+                # fixed_var = 1,
+                default_var=0,
+                name="Load weights for pd_dat?")
+
 load_weights_kd = experiment_FlowPINN.add_param([False,True],
-                fixed_var = 0,
+                # fixed_var = 0,
                 # fixed_var = 1,
                 default_var=0,
                 name="Load weights for kd?")
 
 load_weights_pd_pinn = experiment_FlowPINN.add_param([False,True],
-                fixed_var = 0,
+                # fixed_var = 0,
                 # fixed_var = 1,
                 default_var=0,
                 name="Load weights for pd_pinn?")
@@ -80,10 +86,10 @@ if test_run==True:
 
     experiment_param_epochs_pd_pinn = experiment_FlowPINN.add_param([10,15,30,50,100],
                                             # fixed_var = 0,
-                                            fixed_var = 3,
+                                            fixed_var = 0,
                                             # fixed_var = 3,
                                             name="Number Epochs pd(xd) for test run")
-
+    experiment_param_epochs_pd_pinn_retraining_treshold=0.1
 else:
     experiment_param_epochs_kd = experiment_FlowPINN.add_param([100,300,500],
                                             fixed_var=1,
@@ -178,11 +184,10 @@ model_path_save = save_model.get_path()
 experiment_FlowPINN.save_experiment_params(model_path_save)
 experiment_FlowPINN.save_to_text(model_path_save)
 
-# load_weights_pd_dat = True
-load_weights_pd_dat = False
-model_path_load_pd_dat ="saved_models/{}".format("")
-model_path_load_kd ="saved_models/{}".format("")
-model_path_load_pd_pinn ="saved_models/{}".format("")
+
+model_path_load_pd_dat ="02_model_output/{}".format("model_20250923_121821")
+model_path_load_kd ="02_model_output/{}".format("model_20250923_121821")
+model_path_load_pd_pinn ="02_model_output/{}".format("model_20250923_121821")
 
 # %% Classes and Functions
 
@@ -304,7 +309,7 @@ class Data_Driven_ANN:
         self.pd = sn.Functional('pd', [xd_dat,td_dat],4*[100], "tanh",output_activation="softplus")
         
         # The Data-Driven Model has just one loss term
-        self.mod_pd_ANN = sn.SciModel([xd_dat,td_dat],[self.pd], optimizer="adam",loss_func="mse")
+        self.mod_pd_dat = sn.SciModel([xd_dat,td_dat],[self.pd], optimizer="adam",loss_func="mse")
         
     def train(self,inputs,targets,val=None,
               test_run=False,epochs=200,path_load=None,path_save=None):
@@ -318,10 +323,10 @@ class Data_Driven_ANN:
             batch_size =  64
         
         if isinstance(path_load,str):
-            self.mod_pd_ANN.load_weights("{}/weights_pd_dat".format(path_load))
+            self.mod_pd_dat.load_weights("{}/weights_pd_dat".format(path_load))
             self.history = pandas.read_csv("{}/loss_hist_pd_dat.csv".format(path_load,index_col=0))
         else:
-            self.Hist_pd_dat = self.mod_pd_ANN.train(self.inputs, self.targets,
+            self.Hist_pd_dat = self.mod_pd_dat.train(self.inputs, self.targets,
                                            epochs=epochs,
                                            learning_rate={"scheduler": "ExponentialDecay",
                                                                "initial_learning_rate": 1e-3,
@@ -337,16 +342,16 @@ class Data_Driven_ANN:
             self.history = self.Hist_pd_dat.history
 
         self.pd.set_trainable(False)
-        self.mod_pd_ANN.compile()
+        self.mod_pd_dat.compile()
         if isinstance(path_save,str):
-            self.mod_pd_ANN.save_weights("%s/weights_pd_dat"%(path_save))
+            self.mod_pd_dat.save_weights("%s/weights_pd_dat"%(path_save))
             pandas.DataFrame(data=self.history).to_csv("%s/loss_hist_pd_dat.csv"%path_save)
 
     def get_pd(self):
         return self.pd
     
     def get_SciMod(self):
-        return self.mod_pd_ANN
+        return self.mod_pd_dat
     
     def get_hist(self):
         return self.Hist_pd_dat
@@ -358,8 +363,8 @@ class Data_Driven_ANN:
         
         for wei in range(len(dir_list)-2):
             print(dir_list[wei])
-            self.mod_pd_ANN.load_weights("%s/checkpoints/%s"%(model_path_save,dir_list[wei]))
-            self.mod_pd_ANN.compile()
+            self.mod_pd_dat.load_weights("%s/checkpoints/%s"%(model_path_save,dir_list[wei]))
+            self.mod_pd_dat.compile()
             
             fig, ax1 = plt.subplots(1,1,
                                     # figsize=(10,7)
@@ -640,6 +645,9 @@ if load_weights_pd_pinn==True or load_weights_kd==True:
     t_scaler = t_end / t_c
     print("t_scaler=t_end/t_c=",t_scaler)
     experiment_param_dict_file = open("{}/experiment_param_dict.pkl".format(model_path_save),"wb")
+    pickle.dump(experiment_param_dict,experiment_param_dict_file)
+    experiment_param_dict_file.close()
+
 else:
     experiment_param_dict = {}
     experiment_param_dict_file = open("{}/experiment_param_dict.pkl".format(model_path_save),"wb")
@@ -657,19 +665,20 @@ else:
     print("t_scaler=t_end/t_c=",t_scaler)
 
     v_c = k_c * p_c / mu / x_c
+    
+    # Save model parameters
+    experiment_param_dict["p_c"]=p_c
+    experiment_param_dict["k_c"]=k_c
+    experiment_param_dict["t_c"]=t_c
+    experiment_param_dict["x_c"]=x_c
+    pickle.dump(experiment_param_dict,experiment_param_dict_file)
+    experiment_param_dict_file.close()
 
 xd_min, xd_max = 0. , x_end/x_c
 yd_min, yd_max = 0. , Ly/x_c
 td_min, td_max = 0., t_end/t_c
 pd_min,pd_max = 0, p_max / p_c
 
-# Save model parameters
-experiment_param_dict["p_c"]=p_c
-experiment_param_dict["k_c"]=k_c
-experiment_param_dict["t_c"]=t_c
-experiment_param_dict["x_c"]=x_c
-pickle.dump(experiment_param_dict,experiment_param_dict_file)
-experiment_param_dict_file.close()
 
 # %%% Reset SciANN
 sn.reset_session()
@@ -706,23 +715,30 @@ plt.scatter(dg_input_p[0],dg_target_p[0][1],s=1), plt.xscale("linear"), plt.titl
 
 # %%% Train ANN
 
-create_dir(model_path_save+"/checkpoints")
-pd_ann = Data_Driven_ANN(experiment_param_nr_observation_points,si_noise=experiment_param_sigma_noise)
-pd_ann.train(inputs=dg_input_p,targets=dg_target_p,
-             val=(dg_input_p_val,dg_target_p_val),
-             epochs=20 if test_run==True else 200,
-            #  path_load=model_path_save,
-             path_save=model_path_save,
-             test_run=test_run
-             )
+pd_dat = Data_Driven_ANN(experiment_param_nr_observation_points,si_noise=experiment_param_sigma_noise)
 
+if load_weights_pd_dat==True:
+    pd_dat.mod_pd_dat.load_weights("{}/weights_pd_dat".format(model_path_load_pd_dat))
+    loss_pd_dat=pandas.read_csv("%s/loss_hist_pd_dat.csv"%model_path_load_pd_dat,index_col=0)
+else:
+    create_dir(model_path_save+"/checkpoints")
+    pd_dat.train(inputs=dg_input_p,targets=dg_target_p,
+                val=(dg_input_p_val,dg_target_p_val),
+                epochs=20 if test_run==True else 200,
+                #  path_load=model_path_save,
+                path_save=model_path_save,
+                test_run=test_run
+                )
+    loss_pd_dat=pd_dat.history
+    
 # %%% Plot ANN Result
 
 # history_in_plot=False
 history_in_plot=True
 
 if history_in_plot==True:
-    fig, [ax1,ax2] = plt.subplots(2,1,height_ratios=[3,1],gridspec_kw={"hspace":0.3})
+    # fig, [ax1,ax2] = plt.subplots(2,1,height_ratios=[3,1],gridspec_kw={"hspace":0.3})
+    fig, [ax1,ax2] = plt.subplots(1,2,width_ratios=[1,1],gridspec_kw={"hspace":0.4},figsize=(18,6))
 
 else: fig, ax1 = plt.subplots(1,1,figsize=(6,4),tight_layout=True)
 x_test = np.linspace(0,25)
@@ -730,7 +746,7 @@ x_test = np.linspace(0,25)
 for t_test_i in range(len(t_test_p)):
     #  Prediction
     linewidth = 3
-    ax1.plot(x_test/x_c, pd_ann.pd.eval([x_test/x_c,np.full(x_test.shape,t_test_p[t_test_i]/t_c)]),color=my_cmap["pred"],label="Prediction",
+    ax1.plot(x_test/x_c, pd_dat.pd.eval([x_test/x_c,np.full(x_test.shape,t_test_p[t_test_i]/t_c)]),color=my_cmap["pred"],label="Prediction",
                 zorder=3,linestyle="dashed",linewidth=linewidth)
     # GT
     dataset = GT_OGS[["x","p"]].loc[GT_OGS["t"]==t_test_p[t_test_i]].sort_values(by=["x"])
@@ -757,7 +773,7 @@ ax1.set_ylabel(r"$\bar{p}(\bar{x},\bar{t})$")
 ax1.set_ylim(-0.1,1.1)
 
 if history_in_plot==True:
-    ax2.plot(pd_ann.history["loss"]), ax2.grid(), ax2.set_xlabel("Epochs"), ax2.set_ylabel("Loss"), ax2.set_yscale("log")
+    ax2.plot(loss_pd_dat["loss"]), ax2.grid(), ax2.set_xlabel("Epochs"), ax2.set_ylabel("Loss"), ax2.set_yscale("log")
     if experiment_param_safe_figs==True: plt.savefig("{}/Fig_04_ANN_Regression.png".format(model_path_save),dpi=300)
 else:
     if experiment_param_safe_figs==True: plt.savefig("{}/Fig_04_ANN_Regression.png".format(model_path_save),dpi=300)
@@ -1349,6 +1365,9 @@ for iteration_nr in range(experiment_param_pd_serial_iterx):
         plt.close()
         
         repetion_pd_pinn +=1
+        
+        # Break the iteration if re-training is not wanted
+        if experiment_param_pd_pinn_retraining==False: break
 
 # %% Print Paths
 print("###############################")
